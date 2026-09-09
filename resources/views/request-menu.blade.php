@@ -144,12 +144,12 @@
         </div>
     </div>
 
+    <!-- Script Data Alpine.js Terhubung Database -->
     <script>
         function menuBuilder() {
             return {
-                porsi: 'kecil', // Default awal porsi kecil
+                porsi: 'kecil',
                 
-                // Nilai maxBudget sekarang bereaksi secara otomatis terhadap tipe porsi
                 get maxBudget() {
                     return this.porsi === 'kecil' ? 8000 : 10000;
                 },
@@ -160,20 +160,10 @@
                     { name: 'Protein Nabati', icon: '🥜' }, { name: 'Sayur', icon: '🥬' },
                     { name: 'Buah', icon: '🍎' }, { name: 'Susu', icon: '🥛' }
                 ],
-                menuItems: [
-                    { id: 1, name: 'Jagung Rebus', price: 3500, category: 'Karbohidrat' },
-                    { id: 2, name: 'Kentang Perkedel', price: 3000, category: 'Karbohidrat' },
-                    { id: 3, name: 'Nasi Biru', price: 2000, category: 'Karbohidrat' },
-                    { id: 4, name: 'Nasi Kuning', price: 2000, category: 'Karbohidrat' },
-                    { id: 5, name: 'Ayam Bakar', price: 4500, category: 'Protein Hewani' },
-                    { id: 6, name: 'Telur Dadar', price: 2500, category: 'Protein Hewani' },
-                    { id: 7, name: 'Tempe Goreng', price: 1000, category: 'Protein Nabati' },
-                    { id: 8, name: 'Tahu Isi', price: 1500, category: 'Protein Nabati' },
-                    { id: 9, name: 'Sayur Bayam', price: 2000, category: 'Sayur' },
-                    { id: 10, name: 'Tumis Buncis', price: 2500, category: 'Sayur' },
-                    { id: 11, name: 'Pisang', price: 1500, category: 'Buah' },
-                    { id: 12, name: 'Susu UHT Mini', price: 3000, category: 'Susu' },
-                ],
+                
+                // MENGAMBIL DATA LANGSUNG DARI DATABASE LARAVEL!
+                menuItems: @json($masterMenu),
+                
                 selectedItems: [],
                 get totalCost() { return this.selectedItems.reduce((sum, item) => sum + item.price, 0); },
                 get budgetPercentage() { return (this.totalCost / this.maxBudget) * 100; },

@@ -3,39 +3,50 @@
 namespace App\Http\Controllers;
 
 use App\Models\RequestMenu;
+use App\Models\MenuItem; // Pastikan model ini di-import
 use Illuminate\Http\Request;
 
 class RequestMenuController extends Controller
 {
+    // Menampilkan halaman Request Menu Publik
     public function index()
     {
-        $requests = RequestMenu::latest()->get(); 
-        return view('request-menu', compact('requests'));
+        // Ambil semua data Master Menu dari database
+        $masterMenu = MenuItem::all()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nama,
+                'price' => $item->harga,
+                'category' => $item->kategori,
+            ];
+        });
+
+        // Kirim data ke view
+        return view('request-menu', compact('masterMenu'));
     }
 
+    // Menyimpan data pengajuan dari pengunjung
     public function store(Request $request)
     {
         $request->validate([
-            'nama_menu' => 'required|string|max:255',
+            'nama_menu' => 'required|string',
             'deskripsi' => 'nullable|string',
         ]);
 
         RequestMenu::create([
             'nama_menu' => $request->nama_menu,
             'deskripsi' => $request->deskripsi,
-            'status' => 'Pending', // Status awal selalu Pending
+            'status' => 'Pending',
         ]);
 
         return redirect()->back()->with('success', 'Request Menu berhasil diajukan!');
     }
-    
 
-    // FUNGSI BARU UNTUK ADMIN MENGUBAH STATUS
+    // Admin merubah status (Pending/Disetujui/Ditolak)
     public function updateStatus(Request $request, $id)
     {
         $requestMenu = RequestMenu::findOrFail($id);
         
-        // Validasi agar status yang masuk hanya boleh Disetujui atau Ditolak
         $request->validate([
             'status' => 'required|in:Disetujui,Ditolak,Pending'
         ]);
