@@ -9,7 +9,6 @@ class RequestMenuController extends Controller
 {
     public function index()
     {
-        // Mengambil semua data dari yang paling baru
         $requests = RequestMenu::latest()->get(); 
         return view('request-menu', compact('requests'));
     }
@@ -24,8 +23,27 @@ class RequestMenuController extends Controller
         RequestMenu::create([
             'nama_menu' => $request->nama_menu,
             'deskripsi' => $request->deskripsi,
+            'status' => 'Pending', // Status awal selalu Pending
         ]);
 
         return redirect()->back()->with('success', 'Request Menu berhasil diajukan!');
+    }
+    
+
+    // FUNGSI BARU UNTUK ADMIN MENGUBAH STATUS
+    public function updateStatus(Request $request, $id)
+    {
+        $requestMenu = RequestMenu::findOrFail($id);
+        
+        // Validasi agar status yang masuk hanya boleh Disetujui atau Ditolak
+        $request->validate([
+            'status' => 'required|in:Disetujui,Ditolak,Pending'
+        ]);
+
+        $requestMenu->update([
+            'status' => $request->status
+        ]);
+
+        return redirect()->back()->with('success', 'Status request berhasil diperbarui!');
     }
 }
