@@ -17,10 +17,6 @@
                     <a href="{{ route('request-menu.index') }}" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 {{ request()->routeIs('request-menu.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-900' }}">
                         Request Menu
                     </a>
-                    <a href="{{ route('kas.publik') }}" 
-                    class="px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 {{ request()->routeIs('kas.publik') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-900' }}">
-                        Kas SPPG
-                    </a>
                     @auth
                         <a href="{{ route('dashboard') }}" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-900' }}">
                             Dashboard Admin

@@ -222,9 +222,32 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- MODUL 3: MANAJEMEN KAS SPPG (CRUD) -->
+            <!-- MODUL 3: MANAJEMEN KAS SPPG (CRUD ADMIN) -->
             <!-- ========================================== -->
-            <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+            
+            <!-- KARTU RINGKASAN SALDO (Letakkan di sini) -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+                    <p class="text-emerald-200 font-bold text-sm mb-1 relative z-10">Total Saldo Kas Saat Ini</p>
+                    <h3 class="text-3xl font-black relative z-10">Rp {{ number_format($saldo, 0, ',', '.') }}</h3>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col justify-center">
+                    <p class="text-gray-400 font-bold text-sm mb-1">Total Pemasukan</p>
+                    <h3 class="text-2xl font-black text-green-500">+ Rp {{ number_format($pemasukan, 0, ',', '.') }}</h3>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col justify-center">
+                    <p class="text-gray-400 font-bold text-sm mb-1">Total Pengeluaran</p>
+                    <h3 class="text-2xl font-black text-red-500">- Rp {{ number_format($pengeluaran, 0, ',', '.') }}</h3>
+                </div>
+            </div>
+            <!-- SELESAI KARTU RINGKASAN SALDO -->
+
+
+            <!-- Ini adalah kode tabel yang Anda kirimkan tadi (tetap di bawahnya) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                 
                 <!-- Kolom Kiri: Tabel Riwayat Kas -->
                 <div class="lg:col-span-2 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
@@ -275,6 +298,8 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- (Jangan lupa form tambah kas yang ada di sebelah kanan tetap dibiarkan di bawah sini) -->
 
                 <!-- Kolom Kanan: Form Tambah Kas (Tema Hijau/Emerald agar beda dengan menu) -->
                 <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-6 shadow-lg text-white relative overflow-hidden h-fit">
