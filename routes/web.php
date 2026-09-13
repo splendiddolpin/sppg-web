@@ -8,6 +8,7 @@ use App\Models\KasSppg;
 use App\Models\Akg;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\MenuItemController;
 
 // ==========================================
 // ROUTE PUBLIK (Beranda & Request Menu)
@@ -21,6 +22,7 @@ Route::get('/', function () {
     ]);
     return view('welcome', compact('akgKecil', 'akgBesar'));
 });
+
 Route::get('/informasi-bgn', function () {
     return view('bgn-info');
 })->name('bgn.info');
@@ -85,27 +87,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/request-menu/{id}/status', [RequestMenuController::class, 'updateStatus'])->name('request-menu.update-status');
     
     // CRUD Master Menu
-    Route::post('/master-menu', function (Request $request) {
-        $request->validate(['nama' => 'required|string|max:255', 'kategori' => 'required|string', 'harga' => 'required|numeric']);
-        MenuItem::create($request->all());
-        return back()->with('success', 'Menu baru berhasil ditambahkan!');
-    })->name('master-menu.store');
-
-    Route::get('/master-menu/{id}/edit', function ($id) {
-        $menu = MenuItem::findOrFail($id);
-        return view('master-menu-edit', compact('menu'));
-    })->name('master-menu.edit');
-
-    Route::put('/master-menu/{id}', function (Request $request, $id) {
-        $request->validate(['nama' => 'required|string|max:255', 'kategori' => 'required|string', 'harga' => 'required|numeric']);
-        MenuItem::findOrFail($id)->update($request->all());
-        return redirect()->route('dashboard')->with('success', 'Data menu diperbarui!');
-    })->name('master-menu.update');
-
-    Route::delete('/master-menu/{id}', function ($id) {
-        MenuItem::findOrFail($id)->delete();
-        return back()->with('success', 'Menu berhasil dihapus!');
-    })->name('master-menu.destroy');
+    Route::post('/master-menu', [MenuItemController::class, 'store'])->name('master-menu.store');
+    Route::get('/master-menu/{id}/edit', [MenuItemController::class, 'edit'])->name('master-menu.edit');
+    Route::put('/master-menu/{id}', [MenuItemController::class, 'update'])->name('master-menu.update');
+    Route::delete('/master-menu/{id}', [MenuItemController::class, 'destroy'])->name('master-menu.destroy');
 
     // ==================================================
     // CRUD Kas SPPG (Hanya Proses Simpan & Hapus Data)
