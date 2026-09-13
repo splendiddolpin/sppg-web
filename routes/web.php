@@ -21,6 +21,9 @@ Route::get('/', function () {
     ]);
     return view('welcome', compact('akgKecil', 'akgBesar'));
 });
+Route::get('/informasi-bgn', function () {
+    return view('bgn-info');
+})->name('bgn.info');
 
 Route::get('/request-menu', [RequestMenuController::class, 'index'])->name('request-menu.index');
 Route::post('/request-menu', [RequestMenuController::class, 'store'])->name('request-menu.store')->middleware('throttle:3,1');
