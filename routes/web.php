@@ -52,23 +52,29 @@ Route::get('/dashboard', function () {
     $saldo = $pemasukan - $pengeluaran;
 
     // Menu Terfavorit
-    $menuCounts = collect();
+    $menuCounts = []; // 1. KITA UBAH JADI ARRAY PHP BIASA DULU
+
     foreach ($requests as $req) {
-        if ($req->nama_menu) {
-            $items = explode(', ', $req->nama_menu);
+        if (!empty($req->nama_menu)) {
+            $items = explode(',', $req->nama_menu); // Sesuaikan pemisahnya koma
+            
             foreach ($items as $item) {
                 $itemName = trim($item);
+                
                 if (!empty($itemName)) {
-                    if ($menuCounts->has($itemName)) {
+                    // 2. Hitung menggunakan array PHP murni (100% anti-error)
+                    if (isset($menuCounts[$itemName])) {
                         $menuCounts[$itemName]++;
                     } else {
-                        $menuCounts->put($itemName, 1);
+                        $menuCounts[$itemName] = 1;
                     }
                 }
             }
         }
     }
-    $topMenus = $menuCounts->sortDesc()->take(5);
+
+    // 3. Setelah perhitungan selesai, baru kita ubah jadi Collection untuk diurutkan
+    $topMenus = collect($menuCounts)->sortDesc()->take(5);
 
     return view('dashboard', compact('requests', 'total', 'pending', 'disetujui', 'ditolak', 'menuItems', 'topMenus', 'kasItems', 'pemasukan', 'pengeluaran', 'saldo'));
 })->middleware(['auth', 'verified'])->name('dashboard');

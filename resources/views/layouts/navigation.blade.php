@@ -25,21 +25,64 @@
             <!-- Settings (Desktop) -->
             <div class="hidden md:flex items-center">
                 @auth
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="inline-flex items-center gap-3 px-2 py-1.5 border border-slate-200 rounded-full bg-white hover:bg-slate-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20">
-                                <div class="w-8 h-8 bg-gradient-to-tr from-blue-100 to-blue-200 text-[#2563eb] rounded-full flex items-center justify-center text-xs font-black">{{ substr(Auth::user()->name, 0, 1) }}</div>
-                                <span class="text-xs font-bold text-slate-700 pr-2">{{ explode(' ', Auth::user()->name)[0] }}</span>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')" class="font-bold text-xs uppercase tracking-wider text-slate-600">Profil Saya</x-dropdown-link>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();" class="font-bold text-xs uppercase tracking-wider text-red-600">Logout</x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
+                    <!-- ========================================== -->
+                    <!-- CUSTOM DROPDOWN ALPINE.JS (MENGGANTIKAN BAWAAN LARAVEL) -->
+                    <!-- ========================================== -->
+                    <div class="relative" x-data="{ dropdownOpen: false }" @click.outside="dropdownOpen = false">
+                        
+                        <!-- Tombol Trigger (Avatar) -->
+                        <button @click="dropdownOpen = !dropdownOpen" class="inline-flex items-center gap-3 px-2 py-1.5 border border-slate-200 rounded-full bg-white hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 group">
+                            <!-- Inisial -->
+                            <div class="w-8 h-8 bg-gradient-to-tr from-[#1e3a8a] to-[#2563eb] text-white rounded-full flex items-center justify-center text-xs font-black shadow-inner">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                            <!-- Nama -->
+                            <span class="text-xs font-bold text-slate-700 group-hover:text-[#2563eb] transition-colors">{{ explode(' ', Auth::user()->name)[0] }}</span>
+                            <!-- Ikon Panah Berputar -->
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-[#2563eb] transition-transform duration-300 mr-1" :class="dropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+
+                        <!-- Kotak Menu Dropdown -->
+                        <div x-show="dropdownOpen"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                             class="absolute right-0 mt-3 w-60 rounded-2xl bg-white/95 backdrop-blur-xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-slate-100 z-50 overflow-hidden"
+                             style="display: none;">
+                             
+                            <!-- Area Info User -->
+                            <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                                <p class="text-sm font-black text-slate-800 truncate leading-none">{{ Auth::user()->name }}</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate mt-1.5">{{ Auth::user()->email }}</p>
+                            </div>
+
+                            <!-- Area Tautan / Menu -->
+                            <div class="p-2 flex flex-col gap-1">
+                                <!-- Link Profil -->
+                                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-[#2563eb] hover:bg-blue-50 transition-all group">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                        <svg class="w-4 h-4 text-slate-500 group-hover:text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    </div>
+                                    Profil Saya
+                                </a>
+
+                                <!-- Tombol Logout -->
+                                <form method="POST" action="{{ route('logout') }}" class="m-0">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all group">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-red-100 flex items-center justify-center transition-colors">
+                                            <svg class="w-4 h-4 text-slate-500 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                        </div>
+                                        Logout Akses
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ========================================== -->
                 @else
                     <a href="{{ route('login') }}" class="text-[10px] font-black uppercase tracking-widest text-white bg-[#2563eb] px-6 py-3 rounded-full hover:bg-blue-700 hover:shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all transform hover:-translate-y-0.5">Login Admin</a>
                 @endauth
@@ -79,17 +122,23 @@
         <div class="pt-4 pb-6 px-4 border-t border-slate-100 bg-slate-50">
             @auth
                 <div class="flex items-center gap-3 mb-4 px-2">
-                    <div class="w-10 h-10 bg-blue-100 text-[#2563eb] rounded-full flex items-center justify-center text-sm font-black">{{ substr(Auth::user()->name, 0, 1) }}</div>
+                    <div class="w-10 h-10 bg-gradient-to-tr from-[#1e3a8a] to-[#2563eb] text-white rounded-full flex items-center justify-center text-sm font-black shadow-inner">{{ substr(Auth::user()->name, 0, 1) }}</div>
                     <div>
                         <div class="font-black text-sm text-slate-800">{{ Auth::user()->name }}</div>
                         <div class="font-bold text-[10px] text-slate-500 uppercase tracking-wider">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
                 <div class="flex flex-col gap-2">
-                    <a href="{{ route('profile.edit') }}" class="block px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest bg-white text-slate-600 border border-slate-200">Profil Saya</a>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest bg-white text-slate-600 border border-slate-200">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        Profil Saya
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}" class="m-0">
                         @csrf
-                        <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="block px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest bg-red-50 text-red-600 border border-red-100">Logout</a>
+                        <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest bg-red-50 text-red-600 border border-red-100">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Logout
+                        </a>
                     </form>
                 </div>
             @else
