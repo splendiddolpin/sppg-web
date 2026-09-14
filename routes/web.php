@@ -9,6 +9,7 @@ use App\Models\Akg;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\MenuItemController;
+use App\Http\Controllers\AiController;
 
 // ==========================================
 // ROUTE PUBLIK (Beranda & Request Menu)
@@ -27,6 +28,7 @@ Route::get('/informasi-bgn', function () {
     return view('bgn-info');
 })->name('bgn.info');
 
+Route::post('/api/scan-akg', [AiController::class, 'scanAkg'])->name('api.scan-akg');
 Route::get('/request-menu', [RequestMenuController::class, 'index'])->name('request-menu.index');
 Route::post('/request-menu', [RequestMenuController::class, 'store'])->name('request-menu.store')->middleware('throttle:3,1');
 

@@ -390,5 +390,58 @@
                 }
             }
         }
+
+        function prosesScanAI(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 1. Ubah teks tombol menjadi status loading
+    const button = event.target.nextElementSibling;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<svg class="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> AI Sedang Membaca...';
+    button.disabled = true;
+
+    // 2. Siapkan data gambar untuk dikirim ke Laravel (Backend)
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    // Ambil CSRF Token dari tag meta Laravel
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // 3. Kirim ke Endpoint AIController
+    fetch('{{ route("api.scan-akg") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            // 4. INJEKSI FORM: Masukkan angka dari AI langsung ke kotak input HTML Anda!
+            // Ganti '#input-energi' dengan ID input form Anda yang sebenarnya
+            if(document.getElementById('input-energi')) document.getElementById('input-energi').value = data.energi;
+            if(document.getElementById('input-karbohidrat')) document.getElementById('input-karbohidrat').value = data.karbohidrat;
+            if(document.getElementById('input-protein')) document.getElementById('input-protein').value = data.protein;
+            if(document.getElementById('input-lemak')) document.getElementById('input-lemak').value = data.lemak;
+            if(document.getElementById('input-serat')) document.getElementById('input-serat').value = data.serat;
+            
+            alert('Sukses! AI berhasil membaca dan mengisi nilai gizi.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan jaringan saat menghubungi AI.');
+    })
+    .finally(() => {
+        // Kembalikan tombol seperti semula
+        button.innerHTML = originalText;
+        button.disabled = false;
+        event.target.value = ''; // Reset file input
+    });
+}
     </script>
 </x-app-layout>

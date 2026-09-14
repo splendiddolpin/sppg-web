@@ -29,7 +29,7 @@
                 Profil <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">SPPG</span>
             </h1>
             <h2 data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200" class="text-2xl md:text-4xl font-bold text-blue-200 tracking-wide mb-8">
-                MAGELANG BOROBUDUR
+                MAGELANG BOROBUDUR BOROBUDUR
             </h2>
             <p data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400" class="max-w-2xl mx-auto text-base md:text-lg text-blue-100/80 font-medium">
                 Pemantauan Angka Kecukupan Gizi (AKG), Request Menu, dan Pengelolaan Indikator Kinerja yang transparan dan akurat.
