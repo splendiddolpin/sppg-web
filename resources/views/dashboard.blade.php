@@ -42,26 +42,73 @@
     <!-- MAIN DASHBOARD CONTENT DENGAN ALPINE.JS STATE -->
     <div x-data="dashboardApp()" class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 sm:-mt-16 pb-20">
         
-        <!-- BENTO GRID -->
+        <!-- BENTO GRID (SEKARANG BISA DIKLIK) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-10">
-            <div class="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-lg text-white relative overflow-hidden group hover:-translate-y-1 transition-transform">
+            <!-- Kartu 1: Total Saldo -->
+            <div @click="openModal('saldo')" class="col-span-2 md:col-span-1 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-lg text-white relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                 <div class="relative z-10 flex flex-col h-full justify-between">
                     <p class="text-emerald-200 font-black text-[10px] sm:text-xs uppercase tracking-widest mb-2">Total Saldo Kas</p>
                     <h3 class="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-sm">Rp {{ number_format($saldo ?? 0, 0, ',', '.') }}</h3>
+                    <div class="mt-4 flex items-center text-[9px] font-bold text-emerald-100 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>Lihat Rincian</span>
+                        <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-100 hover:border-green-300 transition-colors flex flex-col justify-between">
-                <p class="text-slate-400 font-black text-[9px] sm:text-[10px] uppercase tracking-widest mb-2">Pemasukan</p>
-                <h3 class="text-lg sm:text-xl font-black text-green-500">+ Rp {{ number_format($pemasukan ?? 0, 0, ',', '.') }}</h3>
+            
+            <!-- Kartu 2: Pemasukan -->
+            <div @click="openModal('pemasukan')" class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-100 hover:border-green-300 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-1">
+                <div>
+                    <p class="text-slate-400 font-black text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 group-hover:text-green-500 transition-colors">Pemasukan</p>
+                    <h3 class="text-lg sm:text-xl font-black text-green-500">+ Rp {{ number_format($pemasukan ?? 0, 0, ',', '.') }}</h3>
+                </div>
+                <div class="mt-2 text-[9px] font-bold text-slate-300 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    Detail <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
             </div>
-            <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-100 hover:border-red-300 transition-colors flex flex-col justify-between">
-                <p class="text-slate-400 font-black text-[9px] sm:text-[10px] uppercase tracking-widest mb-2">Pengeluaran</p>
-                <h3 class="text-lg sm:text-xl font-black text-red-500">- Rp {{ number_format($pengeluaran ?? 0, 0, ',', '.') }}</h3>
+            
+            <!-- Kartu 3: Pengeluaran (Dengan Rincian & Klik) -->
+            <div @click="openModal('pengeluaran')" class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-100 hover:border-red-300 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-1 relative">
+                <div>
+                    <p class="text-slate-400 font-black text-[9px] sm:text-[10px] uppercase tracking-widest mb-1 group-hover:text-red-500 transition-colors">Total Pengeluaran</p>
+                    <h3 class="text-lg sm:text-xl font-black text-red-500 mb-2">- Rp {{ number_format($pengeluaran ?? 0, 0, ',', '.') }}</h3>
+                </div>
+                
+                <!-- Rincian Singkat (Tampil di dalam Card) -->
+                <div class="mt-1 pt-2 border-t border-slate-100/80 space-y-1">
+                    <div class="flex justify-between items-center text-[9px] font-bold">
+                        <span class="text-slate-400">Umum</span>
+                        <span class="text-red-400">Rp {{ number_format($pengeluaranUmum ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[9px] font-bold">
+                        <span class="text-purple-400">Mitra</span>
+                        <span class="text-purple-500">Rp {{ number_format($reimburseMitra ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[9px] font-bold">
+                        <span class="text-orange-400">Operasional</span>
+                        <span class="text-orange-500">Rp {{ number_format($reimburseOperasional ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[9px] font-bold">
+                        <span class="text-teal-400">Bahan Baku</span>
+                        <span class="text-teal-500">Rp {{ number_format($reimburseCV ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-3 text-[8px] font-bold text-slate-300 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 group-hover:text-red-400">
+                    Klik Info Lengkap <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
             </div>
-            <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-100 hover:border-blue-300 transition-colors flex flex-col justify-between">
-                <p class="text-slate-400 font-black text-[9px] sm:text-[10px] uppercase tracking-widest mb-2">Menu Aktif</p>
-                <h3 class="text-2xl sm:text-3xl font-black text-[#2563eb]">{{ isset($menuItems) ? $menuItems->count() : 0 }} <span class="text-xs text-slate-400 uppercase tracking-widest">Item</span></h3>
+            
+            <!-- Kartu 4: Menu Aktif -->
+            <div @click="openModal('menu')" class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-100 hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer hover:-translate-y-1">
+                <div>
+                    <p class="text-slate-400 font-black text-[9px] sm:text-[10px] uppercase tracking-widest mb-2 group-hover:text-[#2563eb] transition-colors">Menu Aktif</p>
+                    <h3 class="text-2xl sm:text-3xl font-black text-[#2563eb]">{{ isset($menuItems) ? $menuItems->count() : 0 }} <span class="text-xs text-slate-400 uppercase tracking-widest">Item</span></h3>
+                </div>
+                <div class="mt-2 text-[9px] font-bold text-slate-300 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    Detail Data <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
             </div>
         </div>
 
@@ -228,19 +275,20 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- 4. MANAJEMEN KAS (CRUD) -->
+        <!-- 4. MANAJEMEN KAS & REIMBURSE (CRUD) -->
         <!-- ========================================== -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-            <div class="lg:col-span-2 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-10">
+            <!-- Tabel Riwayat Keuangan -->
+            <div class="lg:col-span-2 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden flex flex-col h-full">
                 <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Riwayat Keuangan</h3>
+                    <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Riwayat Keuangan & Reimburse</h3>
                 </div>
-                <div class="overflow-x-auto max-h-[400px] modal-scroll">
+                <div class="overflow-x-auto max-h-[400px] modal-scroll flex-grow">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead class="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-10 shadow-sm border-b border-slate-200">
                             <tr>
                                 <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal</th>
-                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Keterangan</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Keterangan & Jenis</th>
                                 <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nominal</th>
                                 <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                             </tr>
@@ -248,34 +296,69 @@
                         <tbody class="divide-y divide-slate-100">
                             @if(isset($kasItems) && $kasItems->count() > 0)
                                 @foreach($kasItems as $kas)
+                                    @php
+                                        // Logika untuk menentukan warna badge berdasarkan jenis transaksi
+                                        $isExpense = $kas->jenis != 'Pemasukan';
+                                        
+                                        $badgeClass = 'bg-slate-100 text-slate-600 border-slate-200'; // Default
+                                        if ($kas->jenis == 'Pemasukan') {
+                                            $badgeClass = 'bg-green-50 text-green-600 border-green-200';
+                                        } elseif ($kas->jenis == 'Pengeluaran Umum') {
+                                            $badgeClass = 'bg-red-50 text-red-600 border-red-200';
+                                        } elseif ($kas->jenis == 'Reimburse Mitra') {
+                                            $badgeClass = 'bg-purple-50 text-purple-600 border-purple-200';
+                                        } elseif ($kas->jenis == 'Reimburse Operasional') {
+                                            $badgeClass = 'bg-orange-50 text-orange-600 border-orange-200';
+                                        } elseif ($kas->jenis == 'Reimburse CV (Bahan Baku)') {
+                                            $badgeClass = 'bg-teal-50 text-teal-600 border-teal-200';
+                                        }
+                                    @endphp
                                     <tr class="hover:bg-slate-50/50 transition-colors">
-                                        <td class="px-6 py-4 text-xs font-bold text-slate-800">{{ \Carbon\Carbon::parse($kas->tanggal)->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 text-xs font-bold text-slate-800">
+                                            {{ \Carbon\Carbon::parse($kas->tanggal)->format('d M Y') }}
+                                        </td>
                                         <td class="px-6 py-4">
                                             <div class="text-xs font-bold text-slate-800">{{ $kas->keterangan }}</div>
-                                            <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded mt-1 inline-block border {{ $kas->jenis == 'Pemasukan' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200' }}">
+                                            <!-- Badge Warna Warni Dinamis -->
+                                            <span class="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded mt-1.5 inline-block border {{ $badgeClass }}">
                                                 {{ $kas->jenis }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-xs font-black {{ $kas->jenis == 'Pemasukan' ? 'text-green-500' : 'text-red-500' }}">
-                                            {{ $kas->jenis == 'Pemasukan' ? '+' : '-' }} Rp {{ number_format($kas->nominal, 0, ',', '.') }}
+                                        <td class="px-6 py-4 text-xs font-black {{ $isExpense ? 'text-red-500' : 'text-green-500' }}">
+                                            {{ $isExpense ? '-' : '+' }} Rp {{ number_format($kas->nominal, 0, ',', '.') }}
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <!-- TOMBOL DELETE BARU UNTUK KAS -->
-                                            <button type="button" @click="confirmDelete('{{ route('kas.destroy', $kas->id) }}', 'Catatan Kas: {{ addslashes($kas->keterangan) }}')" class="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <!-- Logika Khusus Reimburse -->
+                                                @if(str_contains($kas->jenis, 'Reimburse'))
+                                                    @if(empty($kas->status) || $kas->status == 'Pending')
+                                                        <!-- Tombol Centang Pelunasan -->
+                                                        <button type="button" @click="confirmLunas('{{ route('kas.lunas', $kas->id) }}', '{{ addslashes($kas->keterangan) }}', '{{ number_format($kas->nominal, 0, ',', '.') }}')" class="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 transition-colors tooltip" title="Lunasi Reimburse">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                        </button>
+                                                    @else
+                                                        <!-- Badge Lunas (Jika sudah dicentang) -->
+                                                        <span class="px-2 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded text-[9px] font-black uppercase tracking-widest cursor-default" title="Sudah Dicairkan">Lunas</span>
+                                                    @endif
+                                                @endif
+                                                
+                                                <!-- Tombol Hapus -->
+                                                <button type="button" @click="confirmDelete('{{ route('kas.destroy', $kas->id) }}', 'Transaksi: {{ addslashes($kas->keterangan) }}')" class="p-2 bg-slate-50 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors tooltip" title="Hapus">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             @else
-                                <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">Belum ada catatan</td></tr>
+                                <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">Belum ada catatan keuangan</td></tr>
                             @endif
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Form Tambah Kas -->
+            <!-- Form Tambah Kas & Reimburse -->
             <div class="lg:col-span-1 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-6 sm:p-8 shadow-xl text-white relative overflow-hidden flex flex-col justify-center">
                 <div class="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl"></div>
                 <h3 class="font-black text-sm uppercase tracking-widest mb-6 relative z-10">Catat Transaksi</h3>
@@ -285,16 +368,26 @@
                         <label class="text-[10px] font-black text-emerald-200 uppercase tracking-widest">Tanggal</label>
                         <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" required class="w-full mt-1.5 rounded-xl bg-white/10 border border-emerald-400/30 text-white focus:ring-2 focus:ring-white px-4 py-3 text-xs font-bold">
                     </div>
+                    
+                    <!-- Dropdown Kategori Kas / Reimburse Baru -->
                     <div>
                         <label class="text-[10px] font-black text-emerald-200 uppercase tracking-widest">Jenis Transaksi</label>
                         <select name="jenis" required class="w-full mt-1.5 rounded-xl bg-emerald-800 border border-emerald-400/30 text-white focus:ring-2 focus:ring-white px-4 py-3 text-xs font-bold">
-                            <option value="Pemasukan">Pemasukan</option>
-                            <option value="Pengeluaran">Pengeluaran</option>
+                            <optgroup label="Pemasukan" class="bg-white text-slate-800">
+                                <option value="Pemasukan">Pemasukan (Dana Masuk)</option>
+                            </optgroup>
+                            <optgroup label="Pengeluaran & Reimburse" class="bg-white text-slate-800">
+                                <option value="Pengeluaran Umum">Pengeluaran Umum</option>
+                                <option value="Reimburse Mitra">Reimburse Mitra</option>
+                                <option value="Reimburse Operasional">Reimburse Operasional</option>
+                                <option value="Reimburse CV (Bahan Baku)">Reimburse CV (Bahan Baku)</option>
+                            </optgroup>
                         </select>
                     </div>
+
                     <div>
-                        <label class="text-[10px] font-black text-emerald-200 uppercase tracking-widest">Keterangan</label>
-                        <input type="text" name="keterangan" required class="w-full mt-1.5 rounded-xl bg-white/10 border border-emerald-400/30 text-white placeholder-emerald-300 focus:ring-2 focus:ring-white px-4 py-3 text-xs font-bold" placeholder="Cth: Dana BOS / Beli Gas">
+                        <label class="text-[10px] font-black text-emerald-200 uppercase tracking-widest">Keterangan / Tujuan</label>
+                        <input type="text" name="keterangan" required class="w-full mt-1.5 rounded-xl bg-white/10 border border-emerald-400/30 text-white placeholder-emerald-300 focus:ring-2 focus:ring-white px-4 py-3 text-xs font-bold" placeholder="Cth: Beli Ayam / Bensin">
                     </div>
                     <div>
                         <label class="text-[10px] font-black text-emerald-200 uppercase tracking-widest">Nominal (Rp)</label>
@@ -304,46 +397,256 @@
                 </form>
             </div>
         </div>
-
         <!-- ========================================== -->
-        <!-- MODAL ALPINE GLOBAL UNTUK HAPUS DATA -->
+        <!-- MODAL ALPINE GLOBAL UNTUK SEMUA DATA -->
         <!-- ========================================== -->
         <template x-teleport="body">
-            <div x-show="showDeleteModal" style="display: none;" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-                <!-- Latar Belakang Buram -->
-                <div x-show="showDeleteModal" x-transition.opacity class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" @click="showDeleteModal = false"></div>
+            <div> <!-- Pembungkus elemen teleport -->
                 
-                <!-- Konten Modal -->
-                <div x-show="showDeleteModal" 
+                <!-- MODAL HAPUS DATA -->
+                <div x-show="showDeleteModal" style="display: none;" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                    <!-- Latar Belakang Buram -->
+                    <div x-show="showDeleteModal" x-transition.opacity class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" @click="showDeleteModal = false"></div>
+                    
+                    <!-- Konten Modal -->
+                    <div x-show="showDeleteModal" 
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 scale-90 translate-y-4"
+                        class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-8 border-t-4 border-red-500 overflow-hidden text-center">
+                        
+                        <!-- Ikon Merah -->
+                        <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner border border-red-100">
+                            <svg class="w-8 h-8 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </div>
+                        
+                        <h2 class="text-xl font-black text-slate-900 mb-2 uppercase tracking-wide">Konfirmasi Hapus</h2>
+                        <p class="text-xs font-bold text-slate-500 mb-8 leading-relaxed">
+                            Anda yakin ingin menghapus <span class="text-red-500 font-black" x-text="deleteItemName"></span> secara permanen? Data yang dihapus tidak dapat dikembalikan.
+                        </p>
+
+                        <div class="flex justify-center gap-3">
+                            <button type="button" @click="showDeleteModal = false" class="w-full px-5 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors">Batal</button>
+                            <form :action="deleteUrl" method="POST" class="w-full m-0">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="w-full px-5 py-3.5 rounded-xl bg-red-600 text-white font-black text-[10px] uppercase tracking-widest shadow-[0_5px_15px_rgba(220,38,38,0.3)] hover:bg-red-700 hover:scale-105 transition-all">Ya, Hapus</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL INFORMASI KARTU KAS (SEKARANG ADA DI DALAM TELEPORT) -->
+                <div x-show="activeModal !== null" style="display: none;" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                    <div x-show="activeModal !== null" x-transition.opacity class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" @click="closeModal()"></div>
+                    
+                    <div x-show="activeModal !== null" 
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 scale-90 translate-y-4"
+                        class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 sm:p-8 overflow-hidden">
+                        
+                        <button @click="closeModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 rounded-full transition-colors tooltip" title="Tutup">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+
+                        <!-- 1. Detail Saldo -->
+                        <template x-if="activeModal === 'saldo'">
+                            <div>
+                                <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Informasi Saldo</h2>
+                                <p class="text-xs font-bold text-slate-500 mb-5">Akumulasi seluruh arus kas SPPG.</p>
+                                <div class="bg-emerald-50 rounded-2xl p-5 border border-emerald-100 text-center">
+                                    <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Saldo Tersedia</p>
+                                    <h3 class="text-3xl font-black text-emerald-700 shadow-sm">Rp {{ number_format($saldo ?? 0, 0, ',', '.') }}</h3>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- 2. Detail Pemasukan -->
+                        <template x-if="activeModal === 'pemasukan'">
+                            <div>
+                                <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Total Pemasukan</h2>
+                                <p class="text-xs font-bold text-slate-500 mb-5">Seluruh dana masuk yang tercatat di sistem.</p>
+                                <div class="bg-green-50 rounded-2xl p-5 border border-green-100 text-center">
+                                    <h3 class="text-2xl font-black text-green-600">+ Rp {{ number_format($pemasukan ?? 0, 0, ',', '.') }}</h3>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- 3. Detail Pengeluaran & Reimburse -->
+                        <template x-if="activeModal === 'pengeluaran'">
+                            <div>
+                                <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-4 border border-red-100">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                                </div>
+                                <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Rincian Pengeluaran</h2>
+                                <p class="text-xs font-bold text-slate-500 mb-5">Total keseluruhan: <span class="font-black text-red-500">Rp {{ number_format($pengeluaran ?? 0, 0, ',', '.') }}</span></p>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                                        <span class="text-[11px] font-black uppercase tracking-widest text-slate-600">Umum</span>
+                                        <span class="text-xs font-black text-red-500">Rp {{ number_format($pengeluaranUmum ?? 0, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3.5 bg-purple-50 rounded-xl border border-purple-100">
+                                        <span class="text-[11px] font-black uppercase tracking-widest text-purple-700">Mitra</span>
+                                        <span class="text-xs font-black text-purple-700">Rp {{ number_format($reimburseMitra ?? 0, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3.5 bg-orange-50 rounded-xl border border-orange-100">
+                                        <span class="text-[11px] font-black uppercase tracking-widest text-orange-700">Operasional</span>
+                                        <span class="text-xs font-black text-orange-700">Rp {{ number_format($reimburseOperasional ?? 0, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3.5 bg-teal-50 rounded-xl border border-teal-100">
+                                        <span class="text-[11px] font-black uppercase tracking-widest text-teal-700">Bahan Baku</span>
+                                        <span class="text-xs font-black text-teal-700">Rp {{ number_format($reimburseCV ?? 0, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- 4. Detail Menu Aktif -->
+                        <template x-if="activeModal === 'menu'">
+                            <div>
+                                <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Katalog Menu</h2>
+                                <p class="text-xs font-bold text-slate-500 mb-5">Informasi master data menu SPPG.</p>
+                                <div class="bg-blue-50 rounded-2xl p-5 border border-blue-100 text-center">
+                                    <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Total Tersimpan</p>
+                                    <h3 class="text-4xl font-black text-[#2563eb]">{{ isset($menuItems) ? $menuItems->count() : 0 }}</h3>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- MODAL PELUNASAN REIMBURSE -->
+                <div x-show="showLunasModal" style="display: none;" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                    <div x-show="showLunasModal" x-transition.opacity class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" @click="showLunasModal = false"></div>
+                    
+                    <div x-show="showLunasModal" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-90 translate-y-4"
+                         class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-8 border-t-4 border-emerald-500 overflow-hidden text-center">
+                         
+                        <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner border border-emerald-100">
+                            <svg class="w-8 h-8 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        
+                        <h2 class="text-xl font-black text-slate-900 mb-1 uppercase tracking-wide">Pencairan Dana</h2>
+                        <p class="text-xs font-bold text-slate-500 mb-5 leading-relaxed">
+                            Tandai reimburse <span class="text-emerald-600 font-black" x-text="lunasItemName"></span> sebagai lunas?
+                        </p>
+                        
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
+                            <p class="text-[10px] uppercase tracking-widest font-black text-slate-400 mb-1">Nominal yang dicairkan</p>
+                            <h3 class="text-2xl font-black text-slate-800">Rp <span x-text="lunasAmount"></span></h3>
+                        </div>
+
+                        <div class="flex justify-center gap-3">
+                            <button type="button" @click="showLunasModal = false" class="w-full px-5 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors">Batal</button>
+                            <form :action="lunasUrl" method="POST" class="w-full m-0">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="w-full px-5 py-3.5 rounded-xl bg-emerald-500 text-white font-black text-[10px] uppercase tracking-widest shadow-[0_5px_15px_rgba(16,185,129,0.3)] hover:bg-emerald-600 hover:scale-105 transition-all">Ya, Lunasi</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </template>
+    </div> <!-- PENUTUP UTAMA x-data="dashboardApp()" -->
+
+    <!-- MODAL INFORMASI KARTU KAS (MUNCUL SAAT KARTU DIKLIK) -->
+            <div x-show="activeModal !== null" style="display: none;" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                <div x-show="activeModal !== null" x-transition.opacity class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" @click="closeModal()"></div>
+                
+                <div x-show="activeModal !== null" 
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 scale-90 translate-y-4"
                      x-transition:enter-end="opacity-100 scale-100 translate-y-0"
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                      x-transition:leave-end="opacity-0 scale-90 translate-y-4"
-                     class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-8 border-t-4 border-red-500 overflow-hidden text-center">
+                     class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 sm:p-8 overflow-hidden">
                      
-                    <!-- Ikon Merah -->
-                    <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner border border-red-100">
-                        <svg class="w-8 h-8 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </div>
-                    
-                    <h2 class="text-xl font-black text-slate-900 mb-2 uppercase tracking-wide">Konfirmasi Hapus</h2>
-                    <p class="text-xs font-bold text-slate-500 mb-8 leading-relaxed">
-                        Anda yakin ingin menghapus <span class="text-red-500 font-black" x-text="deleteItemName"></span> secara permanen? Data yang dihapus tidak dapat dikembalikan.
-                    </p>
+                     <button @click="closeModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 rounded-full transition-colors tooltip" title="Tutup">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                     </button>
 
-                    <div class="flex justify-center gap-3">
-                        <button type="button" @click="showDeleteModal = false" class="w-full px-5 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-colors">Batal</button>
-                        <form :action="deleteUrl" method="POST" class="w-full m-0">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="w-full px-5 py-3.5 rounded-xl bg-red-600 text-white font-black text-[10px] uppercase tracking-widest shadow-[0_5px_15px_rgba(220,38,38,0.3)] hover:bg-red-700 hover:scale-105 transition-all">Ya, Hapus</button>
-                        </form>
-                    </div>
+                     <!-- 1. Detail Saldo -->
+                     <template x-if="activeModal === 'saldo'">
+                         <div>
+                             <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Informasi Saldo</h2>
+                             <p class="text-xs font-bold text-slate-500 mb-5">Akumulasi seluruh arus kas SPPG.</p>
+                             <div class="bg-emerald-50 rounded-2xl p-5 border border-emerald-100 text-center">
+                                 <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Saldo Tersedia</p>
+                                 <h3 class="text-3xl font-black text-emerald-700 shadow-sm">Rp {{ number_format($saldo ?? 0, 0, ',', '.') }}</h3>
+                             </div>
+                         </div>
+                     </template>
+
+                     <!-- 2. Detail Pemasukan -->
+                     <template x-if="activeModal === 'pemasukan'">
+                         <div>
+                             <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Total Pemasukan</h2>
+                             <p class="text-xs font-bold text-slate-500 mb-5">Seluruh dana masuk yang tercatat di sistem.</p>
+                             <div class="bg-green-50 rounded-2xl p-5 border border-green-100 text-center">
+                                 <h3 class="text-2xl font-black text-green-600">+ Rp {{ number_format($pemasukan ?? 0, 0, ',', '.') }}</h3>
+                             </div>
+                         </div>
+                     </template>
+
+                     <!-- 3. Detail Pengeluaran & Reimburse (YANG PALING PENTING) -->
+                     <template x-if="activeModal === 'pengeluaran'">
+                         <div>
+                             <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-4 border border-red-100">
+                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                             </div>
+                             <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Rincian Pengeluaran</h2>
+                             <p class="text-xs font-bold text-slate-500 mb-5">Total keseluruhan: <span class="font-black text-red-500">Rp {{ number_format($pengeluaran ?? 0, 0, ',', '.') }}</span></p>
+                             
+                             <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                                    <span class="text-[11px] font-black uppercase tracking-widest text-slate-600">Umum</span>
+                                    <span class="text-xs font-black text-red-500">Rp {{ number_format($pengeluaranUmum ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3.5 bg-purple-50 rounded-xl border border-purple-100">
+                                    <span class="text-[11px] font-black uppercase tracking-widest text-purple-700">Mitra</span>
+                                    <span class="text-xs font-black text-purple-700">Rp {{ number_format($reimburseMitra ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3.5 bg-orange-50 rounded-xl border border-orange-100">
+                                    <span class="text-[11px] font-black uppercase tracking-widest text-orange-700">Operasional</span>
+                                    <span class="text-xs font-black text-orange-700">Rp {{ number_format($reimburseOperasional ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3.5 bg-teal-50 rounded-xl border border-teal-100">
+                                    <span class="text-[11px] font-black uppercase tracking-widest text-teal-700">Bahan Baku</span>
+                                    <span class="text-xs font-black text-teal-700">Rp {{ number_format($reimburseCV ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                             </div>
+                         </div>
+                     </template>
+
+                     <!-- 4. Detail Menu Aktif -->
+                     <template x-if="activeModal === 'menu'">
+                         <div>
+                             <h2 class="text-lg font-black text-slate-900 mb-1 uppercase tracking-wide">Katalog Menu</h2>
+                             <p class="text-xs font-bold text-slate-500 mb-5">Informasi master data menu SPPG.</p>
+                             <div class="bg-blue-50 rounded-2xl p-5 border border-blue-100 text-center">
+                                 <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Total Tersimpan</p>
+                                 <h3 class="text-4xl font-black text-[#2563eb]">{{ isset($menuItems) ? $menuItems->count() : 0 }}</h3>
+                             </div>
+                         </div>
+                     </template>
+                     
                 </div>
             </div>
-        </template>
-    </div>
 
     <!-- SCRIPT -->
     <script>
@@ -376,17 +679,40 @@
         });
 
         // FUNGSI ALPINE UNTUK LOGIKA GLOBAL DASHBOARD
+        // FUNGSI ALPINE UNTUK LOGIKA GLOBAL DASHBOARD
         function dashboardApp() {
             return {
                 showDeleteModal: false,
                 deleteUrl: '',
                 deleteItemName: '',
                 
-                // Fungsi untuk memicu modal hapus dari tombol mana saja
+                // Variabel khusus Modal Pelunasan Reimburse
+                showLunasModal: false,
+                lunasUrl: '',
+                lunasItemName: '',
+                lunasAmount: '',
+                
+                activeModal: null, 
+                
                 confirmDelete(url, itemName) {
                     this.deleteUrl = url;
                     this.deleteItemName = itemName;
                     this.showDeleteModal = true;
+                },
+
+                // Fungsi pemicu klik tombol centang
+                confirmLunas(url, itemName, amount) {
+                    this.lunasUrl = url;
+                    this.lunasItemName = itemName;
+                    this.lunasAmount = amount;
+                    this.showLunasModal = true;
+                },
+
+                openModal(type) {
+                    this.activeModal = type;
+                },
+                closeModal() {
+                    this.activeModal = null;
                 }
             }
         }

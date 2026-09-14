@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\AiController;
+use App\Http\Controllers\KasController; // <-- Tambahan Baru
 
 // ==========================================
 // ROUTE PUBLIK (Beranda & Request Menu)
@@ -47,24 +48,47 @@ Route::get('/dashboard', function () {
     // Master Menu
     $menuItems = MenuItem::latest()->get();
 
-    // Kas Data (Untuk Kartu dan Tabel di Dashboard)
+    // ==================================================
+    // LOGIKA KAS BARU (SISTEM DANA TALANGAN & FIX DATA LAMA)
+    // ==================================================
     $kasItems = KasSppg::orderBy('tanggal', 'desc')->latest()->get();
+    
+    // 1. Pemasukan Murni
     $pemasukan = $kasItems->where('jenis', 'Pemasukan')->sum('nominal');
-    $pengeluaran = $kasItems->where('jenis', 'Pengeluaran')->sum('nominal');
+    
+    // 2. Pengeluaran Umum (whereIn digunakan agar data lama 'Pengeluaran' tetap terbaca)
+    $pengeluaranUmum = $kasItems->whereIn('jenis', ['Pengeluaran', 'Pengeluaran Umum'])->sum('nominal');
+    
+    // 3. LOGIKA REIMBURSE (Abaikan sepenuhnya jika statusnya Lunas)
+    $reimburseMitra = $kasItems->where('jenis', 'Reimburse Mitra')
+                               ->where('status', '!=', 'Lunas')
+                               ->sum('nominal');
+                               
+    $reimburseOperasional = $kasItems->where('jenis', 'Reimburse Operasional')
+                                     ->where('status', '!=', 'Lunas')
+                                     ->sum('nominal');
+                                     
+    $reimburseCV = $kasItems->where('jenis', 'Reimburse CV (Bahan Baku)')
+                            ->where('status', '!=', 'Lunas')
+                            ->sum('nominal');
+
+    // 4. Hitung Total Pengeluaran Nyata
+    $pengeluaran = $pengeluaranUmum + $reimburseMitra + $reimburseOperasional + $reimburseCV;
+    
+    // 5. Saldo Akhir
     $saldo = $pemasukan - $pengeluaran;
 
+    // CATATAN: Jangan tambahkan kode perhitungan rincian lagi di bawah sini, 
+    // karena variabelnya sudah dihitung dengan benar di Langkah 2 & 3.
+    
     // Menu Terfavorit
-    $menuCounts = []; // 1. KITA UBAH JADI ARRAY PHP BIASA DULU
-
+    $menuCounts = [];
     foreach ($requests as $req) {
         if (!empty($req->nama_menu)) {
-            $items = explode(',', $req->nama_menu); // Sesuaikan pemisahnya koma
-            
+            $items = explode(',', $req->nama_menu);
             foreach ($items as $item) {
                 $itemName = trim($item);
-                
                 if (!empty($itemName)) {
-                    // 2. Hitung menggunakan array PHP murni (100% anti-error)
                     if (isset($menuCounts[$itemName])) {
                         $menuCounts[$itemName]++;
                     } else {
@@ -74,13 +98,14 @@ Route::get('/dashboard', function () {
             }
         }
     }
-
-    // 3. Setelah perhitungan selesai, baru kita ubah jadi Collection untuk diurutkan
     $topMenus = collect($menuCounts)->sortDesc()->take(5);
 
-    return view('dashboard', compact('requests', 'total', 'pending', 'disetujui', 'ditolak', 'menuItems', 'topMenus', 'kasItems', 'pemasukan', 'pengeluaran', 'saldo'));
+    return view('dashboard', compact(
+        'requests', 'total', 'pending', 'disetujui', 'ditolak', 
+        'menuItems', 'topMenus', 'kasItems', 'pemasukan', 'pengeluaran', 'saldo',
+        'pengeluaranUmum', 'reimburseMitra', 'reimburseOperasional', 'reimburseCV'
+    ));
 })->middleware(['auth', 'verified'])->name('dashboard');
-
 
 // ==========================================
 // ROUTE AKSI KHUSUS ADMIN
@@ -101,29 +126,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/master-menu/{id}', [MenuItemController::class, 'destroy'])->name('master-menu.destroy');
 
     // ==================================================
-    // CRUD Kas SPPG (Hanya Proses Simpan & Hapus Data)
+    // CRUD Kas SPPG (Sekarang Menggunakan Controller!)
     // ==================================================
+    Route::get('/kas-sppg', function () { return redirect('/'); });
+    Route::post('/kas-sppg', [KasController::class, 'store'])->name('kas.store');
+    Route::delete('/kas-sppg/{id}', [KasController::class, 'destroy'])->name('kas.destroy');
     
-    // RUTE PENGALIHAN: Jika ada yang iseng mengetik URL ini, lempar ke Beranda
-    Route::get('/kas-sppg', function () {
-        return redirect('/');
-    });
-
-    Route::post('/kas-sppg', function (Request $request) {
-        $request->validate([
-            'tanggal' => 'required|date',
-            'jenis' => 'required|in:Pemasukan,Pengeluaran',
-            'keterangan' => 'required|string|max:255',
-            'nominal' => 'required|numeric|min:1'
-        ]);
-        KasSppg::create($request->all());
-        return back()->with('success', 'Catatan kas berhasil ditambahkan!');
-    })->name('kas.store');
-
-    Route::delete('/kas-sppg/{id}', function ($id) {
-        KasSppg::findOrFail($id)->delete();
-        return back()->with('success', 'Catatan kas berhasil dihapus!');
-    })->name('kas.destroy');
+    // RUTE BARU UNTUK PELUNASAN REIMBURSE
+    Route::patch('/kas-sppg/{id}/lunas', [KasController::class, 'lunas'])->name('kas.lunas');
 
     // Update AKG Beranda
     Route::put('/akg/{id}', function(Request $request, $id) {

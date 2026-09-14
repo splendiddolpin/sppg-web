@@ -31,7 +31,7 @@
         
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
             <h1 data-aos="zoom-out" data-aos-duration="1000" class="text-4xl sm:text-6xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4 drop-shadow-2xl">
-                CHOOSE <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">MENU</span>
+                REQUEST <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">MENU</span>
             </h1>
             <p data-aos="fade-up" data-aos-delay="200" class="max-w-xl mx-auto text-xs sm:text-sm md:text-base text-blue-200 font-medium tracking-wide">
                 Silakan lengkapi pesanan Anda. Anda WAJIB memilih 1 menu dari setiap kategori tanpa melewati batas anggaran Rp 10.000.

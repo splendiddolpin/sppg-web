@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class KasSppg extends Model
 {
     use HasFactory;
-    protected $fillable = ['tanggal', 'jenis', 'keterangan', 'nominal'];
+    protected $fillable = ['tanggal', 'jenis', 'keterangan', 'nominal', 'status'];
 }
