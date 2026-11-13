@@ -36,7 +36,7 @@ Route::post('/request-menu', [RequestMenuController::class, 'store'])->name('req
 // ==========================================
 // ROUTE ADMIN (Wajib login)
 // ==========================================
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function (Request $request) {
     $requests = RequestMenu::latest()->get();
     
     // KPI Data
@@ -49,38 +49,38 @@ Route::get('/dashboard', function () {
     $menuItems = MenuItem::latest()->get();
 
     // ==================================================
-    // LOGIKA KAS BARU (SISTEM DANA TALANGAN & FIX DATA LAMA)
+    // 1. LOGIKA PERHITUNGAN TOTAL KAS (SEMUA DATA)
     // ==================================================
-    $kasItems = KasSppg::orderBy('tanggal', 'desc')->latest()->get();
+    $allKas = KasSppg::all();
     
-    // 1. Pemasukan Murni
-    $pemasukan = $kasItems->where('jenis', 'Pemasukan')->sum('nominal');
+    $pemasukan = $allKas->where('jenis', 'Pemasukan')->sum('nominal');
+    $pengeluaranUmum = $allKas->whereIn('jenis', ['Pengeluaran', 'Pengeluaran Umum'])->sum('nominal');
     
-    // 2. Pengeluaran Umum (whereIn digunakan agar data lama 'Pengeluaran' tetap terbaca)
-    $pengeluaranUmum = $kasItems->whereIn('jenis', ['Pengeluaran', 'Pengeluaran Umum'])->sum('nominal');
-    
-    // 3. LOGIKA REIMBURSE (Abaikan sepenuhnya jika statusnya Lunas)
-    $reimburseMitra = $kasItems->where('jenis', 'Reimburse Mitra')
-                               ->where('status', '!=', 'Lunas')
-                               ->sum('nominal');
-                               
-    $reimburseOperasional = $kasItems->where('jenis', 'Reimburse Operasional')
-                                     ->where('status', '!=', 'Lunas')
-                                     ->sum('nominal');
-                                     
-    $reimburseCV = $kasItems->where('jenis', 'Reimburse CV (Bahan Baku)')
-                            ->where('status', '!=', 'Lunas')
-                            ->sum('nominal');
+    $reimburseMitra = $allKas->where('jenis', 'Reimburse Mitra')->where('status', '!=', 'Lunas')->sum('nominal');
+    $reimburseOperasional = $allKas->where('jenis', 'Reimburse Operasional')->where('status', '!=', 'Lunas')->sum('nominal');
+    $reimburseCV = $allKas->where('jenis', 'Reimburse CV (Bahan Baku)')->where('status', '!=', 'Lunas')->sum('nominal');
 
-    // 4. Hitung Total Pengeluaran Nyata
     $pengeluaran = $pengeluaranUmum + $reimburseMitra + $reimburseOperasional + $reimburseCV;
-    
-    // 5. Saldo Akhir
     $saldo = $pemasukan - $pengeluaran;
 
-    // CATATAN: Jangan tambahkan kode perhitungan rincian lagi di bawah sini, 
-    // karena variabelnya sudah dihitung dengan benar di Langkah 2 & 3.
-    
+    // ==================================================
+    // 2. LOGIKA FILTER KATEGORI & PAGINATION TABEL
+    // ==================================================
+    $kategoriKas = $request->query('kategori_kas');
+    $kasQuery = KasSppg::orderBy('tanggal', 'desc')->latest();
+
+    if (!empty($kategoriKas)) {
+        if ($kategoriKas === 'Pengeluaran Umum') {
+            // Mengakomodasi data lama 'Pengeluaran' dan baru 'Pengeluaran Umum'
+            $kasQuery->whereIn('jenis', ['Pengeluaran', 'Pengeluaran Umum']);
+        } else {
+            $kasQuery->where('jenis', $kategoriKas);
+        }
+    }
+
+    // Batasi 8 transaksi per halaman & simpan parameter URL saat pindah halaman
+    $kasItems = $kasQuery->paginate(8, ['*'], 'kas_page')->withQueryString();
+
     // Menu Terfavorit
     $menuCounts = [];
     foreach ($requests as $req) {
@@ -89,11 +89,7 @@ Route::get('/dashboard', function () {
             foreach ($items as $item) {
                 $itemName = trim($item);
                 if (!empty($itemName)) {
-                    if (isset($menuCounts[$itemName])) {
-                        $menuCounts[$itemName]++;
-                    } else {
-                        $menuCounts[$itemName] = 1;
-                    }
+                    $menuCounts[$itemName] = ($menuCounts[$itemName] ?? 0) + 1;
                 }
             }
         }
@@ -103,7 +99,8 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact(
         'requests', 'total', 'pending', 'disetujui', 'ditolak', 
         'menuItems', 'topMenus', 'kasItems', 'pemasukan', 'pengeluaran', 'saldo',
-        'pengeluaranUmum', 'reimburseMitra', 'reimburseOperasional', 'reimburseCV'
+        'pengeluaranUmum', 'reimburseMitra', 'reimburseOperasional', 'reimburseCV',
+        'kategoriKas'
     ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 

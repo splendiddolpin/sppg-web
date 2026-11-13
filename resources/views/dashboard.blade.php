@@ -274,16 +274,54 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
+       <!-- ========================================== -->
         <!-- 4. MANAJEMEN KAS & REIMBURSE (CRUD) -->
         <!-- ========================================== -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-10">
-            <!-- Tabel Riwayat Keuangan -->
+        <div id="riwayat-kas" class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-10">
+            <!-- Tabel Riwayat Keuangan (Dengan Filter Kategori & Pagination) -->
             <div class="lg:col-span-2 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden flex flex-col h-full">
-                <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Riwayat Keuangan & Reimburse</h3>
+                
+                <!-- Header & Tab Filter Kategori -->
+                <div class="px-6 py-5 border-b border-slate-100 flex flex-col gap-4 bg-slate-50/50">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm">Riwayat Keuangan & Reimburse</h3>
+                        @if(method_exists($kasItems, 'total'))
+                            <span class="text-[10px] font-bold text-slate-400">Total: {{ $kasItems->total() }} Data</span>
+                        @endif
+                    </div>
+
+                    <!-- Pill Filter Kategori -->
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        @php $kat = $kategoriKas ?? request('kategori_kas', ''); @endphp
+                        <a href="{{ route('dashboard', ['kategori_kas' => '']) }}#riwayat-kas" 
+                           class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border {{ $kat === '' ? 'bg-slate-800 text-white border-slate-800 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100' }}">
+                            Semua
+                        </a>
+                        <a href="{{ route('dashboard', ['kategori_kas' => 'Pemasukan']) }}#riwayat-kas" 
+                           class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border {{ $kat === 'Pemasukan' ? 'bg-green-600 text-white border-green-600 shadow-sm' : 'bg-green-50/60 text-green-600 border-green-200 hover:bg-green-100' }}">
+                            Pemasukan
+                        </a>
+                        <a href="{{ route('dashboard', ['kategori_kas' => 'Pengeluaran Umum']) }}#riwayat-kas" 
+                           class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border {{ $kat === 'Pengeluaran Umum' ? 'bg-red-600 text-white border-red-600 shadow-sm' : 'bg-red-50/60 text-red-600 border-red-200 hover:bg-red-100' }}">
+                            Umum
+                        </a>
+                        <a href="{{ route('dashboard', ['kategori_kas' => 'Reimburse Mitra']) }}#riwayat-kas" 
+                           class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border {{ $kat === 'Reimburse Mitra' ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-purple-50/60 text-purple-600 border-purple-200 hover:bg-purple-100' }}">
+                            Mitra
+                        </a>
+                        <a href="{{ route('dashboard', ['kategori_kas' => 'Reimburse Operasional']) }}#riwayat-kas" 
+                           class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border {{ $kat === 'Reimburse Operasional' ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-orange-50/60 text-orange-600 border-orange-200 hover:bg-orange-100' }}">
+                            Operasional
+                        </a>
+                        <a href="{{ route('dashboard', ['kategori_kas' => 'Reimburse CV (Bahan Baku)']) }}#riwayat-kas" 
+                           class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border {{ $kat === 'Reimburse CV (Bahan Baku)' ? 'bg-teal-600 text-white border-teal-600 shadow-sm' : 'bg-teal-50/60 text-teal-600 border-teal-200 hover:bg-teal-100' }}">
+                            CV (Bahan Baku)
+                        </a>
+                    </div>
                 </div>
-                <div class="overflow-x-auto max-h-[400px] modal-scroll flex-grow">
+
+                <!-- Tabel Data -->
+                <div class="overflow-x-auto max-h-[420px] modal-scroll flex-grow">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead class="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-10 shadow-sm border-b border-slate-200">
                             <tr>
@@ -303,7 +341,7 @@
                                         $badgeClass = 'bg-slate-100 text-slate-600 border-slate-200'; // Default
                                         if ($kas->jenis == 'Pemasukan') {
                                             $badgeClass = 'bg-green-50 text-green-600 border-green-200';
-                                        } elseif ($kas->jenis == 'Pengeluaran Umum') {
+                                        } elseif ($kas->jenis == 'Pengeluaran Umum' || $kas->jenis == 'Pengeluaran') {
                                             $badgeClass = 'bg-red-50 text-red-600 border-red-200';
                                         } elseif ($kas->jenis == 'Reimburse Mitra') {
                                             $badgeClass = 'bg-purple-50 text-purple-600 border-purple-200';
@@ -356,6 +394,28 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Footer Pagination -->
+                @if(method_exists($kasItems, 'hasPages') && $kasItems->hasPages())
+                    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            Halaman {{ $kasItems->currentPage() }} dari {{ $kasItems->lastPage() }}
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                            @if($kasItems->onFirstPage())
+                                <span class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-300 text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Sebelumnya</span>
+                            @else
+                                <a href="{{ $kasItems->previousPageUrl() }}#riwayat-kas" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-800 hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors shadow-sm">Sebelumnya</a>
+                            @endif
+
+                            @if($kasItems->hasMorePages())
+                                <a href="{{ $kasItems->nextPageUrl() }}#riwayat-kas" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-800 hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors shadow-sm">Selanjutnya</a>
+                            @else
+                                <span class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-300 text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Selanjutnya</a>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Form Tambah Kas & Reimburse -->
